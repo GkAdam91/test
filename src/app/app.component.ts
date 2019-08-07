@@ -24,37 +24,73 @@ export class AppComponent {
     const content = document.getElementById('content');
     console.log('content:', content)
     const view1Scene = new THREE.Scene();
-    const view1Camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-    view1Camera.position.z = 1000;
-    const controls = new OrbitControls(view1Camera, this.renderer.domElement);
-    controls.target.set(0, 0, 0);
-    controls.update();
-
+    
     const geometry = new THREE.BoxGeometry(200, 200, 200);
     const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
     const mesh = new THREE.Mesh(geometry, material);
-
-
+    
+    
     view1Scene.add(mesh);
     view1Scene.add(new THREE.HemisphereLight(0xaaaaaa, 0x444444));
-
-
+    
+    
     const view1Element = document.createElement('div');
     view1Element.className = 'viewTape';
     view1Element.innerHTML = "<div class='Tape'></div>";
-
+    content.appendChild(view1Element);
+    
+    const width = view1Element.querySelector(".Tape").clientWidth;
+    const height = view1Element.querySelector(".Tape").clientHeight;
+    console.log('height:', height)
+    const view1Camera = new THREE.PerspectiveCamera(75, 100 / 15, 1, 10000);
+    view1Camera.position.z = 400;
+    
+    const controls = new OrbitControls(view1Camera, view1Element.querySelector(".Tape"));
+    controls.target.set(0, 0, 0);
+    controls.update();
+    
     view1Scene.userData = {
       camera: view1Camera,
       element: view1Element.querySelector(".Tape"),
-      controls: controls
+      controls: controls,
+      clearColor: 0x202020
     };
-    content.appendChild(view1Element);
     this.scenes.push(view1Scene);
   }
 
 
   initSplitLeft() {
+    const content = document.getElementById('content');
+    
+    const leftScene = new THREE.Scene();
+    
+    const geometry = new THREE.CylinderGeometry(100, 100, 200);
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    
+    leftScene.add(mesh);
+    leftScene.add(new THREE.HemisphereLight(0xaaaaaa, 0x444444));
+    
+    const leftElement = document.createElement('div');
+    leftElement.className = 'splitView';
+    leftElement.innerHTML = "<div class='split'></div>";
+    content.appendChild(leftElement);
+    
+    const leftCamera = new THREE.PerspectiveCamera(70, 49/85, 1, 1000 );
+    leftCamera.position.z = 50;
+    
+    const controls = new OrbitControls(leftCamera, leftElement.querySelector(".split"));
+    controls.target.set(0, 0, 0);
+    controls.update();
 
+    leftScene.userData = {
+      camera: leftCamera,
+      element: leftElement.querySelector(".split"),
+      controls: controls,
+      clearColor: 0x808080
+    };
+    this.scenes.push(leftScene);
   }
 
   initSplitRight() {
@@ -71,6 +107,7 @@ export class AppComponent {
     // this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.initView1();
+    this.initSplitLeft();
     // this.view1Canvas.appendChild(this.renderer.domElement);
     this.labelContainerElem = document.querySelector('#labels');
     console.log('this.labelContainerElem:', this.labelContainerElem)
@@ -112,6 +149,7 @@ export class AppComponent {
       // console.log('left:', left)
       this.renderer.setScissor(left, bottom, width, height+50);
       var camera = scene.userData.camera;
+      this.renderer.setClearColor(scene.userData.clearColor);
       //  console.log('camera:', camera)
       //camera.aspect = width / height; // not changing in this example
       //camera.updateProjectionMatrix();
